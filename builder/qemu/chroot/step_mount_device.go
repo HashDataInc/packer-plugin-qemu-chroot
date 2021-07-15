@@ -69,7 +69,7 @@ func (s *StepMountDevice) Run(_ context.Context, state multistep.StateBag) multi
 		// sync the file system
 		var fileOsResult string
 		if fileOsResult, err = RunCommand(state, fmt.Sprintf("df -T | grep %s", device)); err != nil {
-			return Halt(state, fmt.Errorf("can not peek the file system of deivce:\"%s\" ,%s", device, err))
+			return Halt(state, fmt.Errorf("cannot peek the file system of deivce:\"%s\" ,%s", device, err))
 		}
 		//remove extra space
 		for {
