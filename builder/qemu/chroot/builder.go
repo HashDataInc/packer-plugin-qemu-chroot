@@ -1,11 +1,12 @@
 //go:generate struct-markdown
 //go:generate mapstructure-to-hcl2 -type Config
 
+package chroot
+
 // The chroot package is able to create an qcow2 format image without requiring the
 // launch of a new instance virtual machine for every build. It does this by attaching and
 // mounting the source image and chrooting into that directory.
 // It then creates a new qcow2 format image from that attached drive.
-package chroot
 
 import (
 	"context"
@@ -76,6 +77,8 @@ type Config struct {
 	// that uses systemd.
 	CopyFiles []string `mapstructure:"copy_files" required:"false"`
 
+	QemuImageSize int32 `mapstructure:"qemu_image_size" required:"false"`
+
 	ctx interpolate.Context
 }
 
@@ -126,6 +129,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	// set default copy file if we're not giving our own
+	if b.config.QemuImageSize != 0 {
+		if b.config.QemuImageSize < 8 {
+			return nil, nil, errors.New("qemu_image_size is not allow less than 8")
+		}
+	}
 	if b.config.CopyFiles == nil {
 		b.config.CopyFiles = []string{"/etc/resolv.conf"}
 	}
