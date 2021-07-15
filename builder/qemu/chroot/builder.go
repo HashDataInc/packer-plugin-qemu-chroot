@@ -77,7 +77,7 @@ type Config struct {
 	// that uses systemd.
 	CopyFiles []string `mapstructure:"copy_files" required:"false"`
 
-	QemuImageSize int32 `mapstructure:"qemu_image_size" required:"false"`
+	ImageSize int32 `mapstructure:"image_size" required:"false"`
 
 	ctx interpolate.Context
 }
@@ -129,10 +129,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	// set default copy file if we're not giving our own
-	if b.config.QemuImageSize != 0 {
-		if b.config.QemuImageSize < 8 {
-			return nil, nil, errors.New("qemu_image_size is not allow less than 8")
-		}
+	if b.config.ImageSize < 0 {
+		return nil, nil, errors.New("image_size is not allow less than 0")
 	}
 	if b.config.CopyFiles == nil {
 		b.config.CopyFiles = []string{"/etc/resolv.conf"}

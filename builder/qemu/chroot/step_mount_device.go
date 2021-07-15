@@ -65,7 +65,7 @@ func (s *StepMountDevice) Run(_ context.Context, state multistep.StateBag) multi
 		return Halt(state, fmt.Errorf("Cannot mount device \"%s\": %s", device, err))
 	}
 
-	if config.QemuImageSize != 8 {
+	if config.ImageSize > 0 {
 		// sync the file system
 		var fileOsResult string
 		if fileOsResult, err = RunCommand(state, fmt.Sprintf("df -T | grep %s", device)); err != nil {

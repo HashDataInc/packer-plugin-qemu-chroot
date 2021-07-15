@@ -66,8 +66,8 @@ func (s *StepPrepareSourceImage) prepareSourceImage(state multistep.StateBag) er
 		return fmt.Errorf("Cannot convert source image to raw format: %s", err)
 	}
 	// Resize raw img
-	if config.QemuImageSize != 8 {
-		if _, err := RunCommand(state, fmt.Sprintf("qemu-img resize %s %dG", s.rawImage, config.QemuImageSize)); err != nil {
+	if config.ImageSize >0 {
+		if _, err := RunCommand(state, fmt.Sprintf("qemu-img resize %s %dG", s.rawImage, config.ImageSize)); err != nil {
 			return fmt.Errorf("cannot resize raw image : %s", err)
 		}
 	}
