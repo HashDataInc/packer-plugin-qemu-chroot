@@ -130,7 +130,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 	// set default copy file if we're not giving our own
 	if b.config.ImageSize < 0 {
-		return nil, nil, errors.New("image_size is not allow less than 0")
+		return nil, nil, errors.New("illegal image_size")
 	}
 	if b.config.CopyFiles == nil {
 		b.config.CopyFiles = []string{"/etc/resolv.conf"}
