@@ -73,37 +73,21 @@ func (s *StepPrepareSourceImage) prepareSourceImage(state multistep.StateBag) er
 		if err != nil {
 			return fmt.Errorf("get device name error: %s", err)
 		}
-		if _, err := RunCommand(state, fmt.Sprintf("fdisk %s", device)); err != nil {
-			return fmt.Errorf("fdisk error: %s", err)
+		if _, err := RunCommand(state, fmt.Sprintf("parted %s", device)); err != nil {
+			return fmt.Errorf("parted error: %s", err)
 		}
-		if _, err := RunCommand(state, fmt.Sprintf("d")); err != nil {
-			return fmt.Errorf("delete the partation of device error : %s", err)
+		if _, err := RunCommand(state, fmt.Sprintf("resizepart 1")); err != nil {
+			return fmt.Errorf("resizepart error : %s", err)
 		}
-		if _, err := RunCommand(state, fmt.Sprintf("n")); err != nil {
-			return fmt.Errorf("new partation error: %s", err)
+		if _, err := RunCommand(state, fmt.Sprintf("%d", config.ImageSize*1024)); err != nil {
+			return fmt.Errorf("change part size error : %s", err)
 		}
-		if _, err := RunCommand(state, fmt.Sprintf("")); err != nil {
-			return fmt.Errorf("first enter error: %s", err)
-		}
-		if _, err := RunCommand(state, fmt.Sprintf("")); err != nil {
-			return fmt.Errorf("second enter error : %s", err)
-		}
-		if _, err := RunCommand(state, fmt.Sprintf("")); err != nil {
-			return fmt.Errorf("third enter error: %s", err)
-		}
-		if _, err := RunCommand(state, fmt.Sprintf("")); err != nil {
-			return fmt.Errorf("fourth enter error: %s", err)
-		}
-		if _, err := RunCommand(state, fmt.Sprintf("w")); err != nil {
-			return fmt.Errorf("save parrarion error: %s", err)
-		}
-		if _, err := RunCommand(state, fmt.Sprintf("partprobe")); err != nil {
-			return fmt.Errorf("partprobe error: %s", err)
+		if _, err := RunCommand(state, fmt.Sprintf("q")); err != nil {
+			return fmt.Errorf("quit parted error : %s", err)
 		}
 		if _, err := RunCommand(state, fmt.Sprintf("losetup -d %s", device)); err != nil {
 			return fmt.Errorf("uninsall device error: %s", err)
 		}
-
 	}
 	return nil
 }
