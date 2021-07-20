@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 // StepPrepareSourceImage process the source image.
@@ -73,17 +74,14 @@ func (s *StepPrepareSourceImage) prepareSourceImage(state multistep.StateBag) er
 		if err != nil {
 			return fmt.Errorf("get device name error: %s", err)
 		}
-		if _, err := RunCommand(state, fmt.Sprintf("parted %s", device)); err != nil {
+		//get parted
+		content, err := RunCommand(state, fmt.Sprintf("parted -m %s p", device))
+		if err != nil {
 			return fmt.Errorf("parted error: %s", err)
 		}
-		if _, err := RunCommand(state, fmt.Sprintf("resizepart 1")); err != nil {
+		lastPartNumber := len(strings.Split(content, ";")) - 3 //last string is empty
+		if _, err := RunCommand(state, fmt.Sprintf("parted -m %s resizepart %d 100%", device, lastPartNumber)); err != nil {
 			return fmt.Errorf("resizepart error : %s", err)
-		}
-		if _, err := RunCommand(state, fmt.Sprintf("%d", config.ImageSize*1024)); err != nil {
-			return fmt.Errorf("change part size error : %s", err)
-		}
-		if _, err := RunCommand(state, fmt.Sprintf("q")); err != nil {
-			return fmt.Errorf("quit parted error : %s", err)
 		}
 		if _, err := RunCommand(state, fmt.Sprintf("losetup -d %s", device)); err != nil {
 			return fmt.Errorf("uninsall device error: %s", err)
