@@ -3,13 +3,13 @@ package chroot
 import (
 	"context"
 	"fmt"
-	"os"
-	"path"
-	"path/filepath"
-
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/packerbuilderdata"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
 )
 
 // StepPrepareSourceImage process the source image.
@@ -69,6 +69,25 @@ func (s *StepPrepareSourceImage) prepareSourceImage(state multistep.StateBag) er
 	if config.ImageSize > 0 {
 		if _, err := RunCommand(state, fmt.Sprintf("qemu-img resize %s %dG", s.rawImage, config.ImageSize)); err != nil {
 			return fmt.Errorf("cannot resize raw image : %s", err)
+		}
+		device, err := RunCommand(state, fmt.Sprintf("losetup -f --show %s", s.rawImage))
+		if err != nil {
+			return fmt.Errorf("get device name error: %s", err)
+		}
+		//get parted
+		content, err := RunCommand(state, fmt.Sprintf("parted -m %s p", device))
+		if err != nil {
+			return fmt.Errorf("parted error: %s", err)
+		}
+
+		arr := strings.Split(content, "\n")
+		lastPartNumber := strings.Split(arr[len(arr)-1], ":")[0]
+
+		if _, err := RunCommand(state, fmt.Sprintf("parted -m %s resizepart %s 100%", device, lastPartNumber)); err != nil {
+			return fmt.Errorf("resizepart error : %s", err)
+		}
+		if _, err := RunCommand(state, fmt.Sprintf("losetup -d %s", device)); err != nil {
+			return fmt.Errorf("uninsall device error: %s", err)
 		}
 	}
 	return nil
