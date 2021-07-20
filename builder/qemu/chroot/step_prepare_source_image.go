@@ -83,7 +83,7 @@ func (s *StepPrepareSourceImage) prepareSourceImage(state multistep.StateBag) er
 		arr := strings.Split(content, "\n")
 		lastPartNumber := strings.Split(arr[len(arr)-1], ":")[0]
 
-		if _, err := RunCommand(state, fmt.Sprintf("parted -m %s resizepart %s 100%", device, lastPartNumber)); err != nil {
+		if _, err := RunCommand(state, fmt.Sprintf("parted -m %s resizepart %s 100%%", device, lastPartNumber)); err != nil {
 			return fmt.Errorf("resizepart error : %s", err)
 		}
 		if _, err := RunCommand(state, fmt.Sprintf("losetup -d %s", device)); err != nil {
